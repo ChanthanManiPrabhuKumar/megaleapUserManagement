@@ -1,48 +1,71 @@
-import React, {useState, useEffect} from 'react';
-import './App.css';
 
-function App() {
-
-  let [user, setUser] = useState(null)
-  let [input, setInput] = useState("")
-
-
-  useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/users")
-    .then(response => response.json())
-    .then(data => {setUser(data)
-      console.log(data)
-    })
-  },[user])
+import React, { useState, useEffect } from 'react';
+import './App.css'
+const MyComponent = () => {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [input, setInput] = useState("");
+  const [inputdata,setInputdata]= useState([])
 
   useEffect(() => {
-    fetch(`https://jsonplaceholder.typicode.com/users/:${input.id}`)
-    .then(response => response.json())
-    .then(data => {setInput(data)
-      console.log(data)
+    fetch('https://jsonplaceholder.typicode.com/users')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setData(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    console.log(input)
+    const inputdatas = data.filter((item) => {
+      if((item.name.toLowerCase().includes(input.toLowerCase()) == true) || (item.email.toLowerCase().includes(input.toLowerCase()) == true)){
+        return true
+      }
     })
+    setInputdata(inputdatas)
+    console.log(inputdata)
   },[input])
 
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   return (
-    <>
+<>
     <input type='text' onChange={(e) => {
       setInput(e.target.value)
     }}/>
 {
 
-  input === "" ? user.map((item,index) => {
+  input === "" && inputdata.length == 0 ? data.map((item) => {
     return (
-      <div className="App-card">
-    <h1 key={index}>{item.name}</h1>
-     <h2 key={index}>{item.email}</h2>
-    <h2 key={index}>{item.company.name}</h2>
+    <div id="App-card">
+    <h1 key={item.id}>Name : {item.name}</h1>
+    <h2 key={item.id}>Email : {item.email}</h2>
+    <h2 key={item.id}>Company : {item.company.name}</h2>
     </div>
     
   )
   }) :
-  input.map((data,index) => {
+  inputdata.map((data) => {
     return (
-      <div className="App-card">
+    <div id="App-card">
     <h1>{data.name}</h1>
      <h2>{data.email}</h2>
     <h2>{data.company.name}</h2>
@@ -53,6 +76,6 @@ function App() {
 
     </>
   );
-}
+};
 
-export default App;
+export default MyComponent;
